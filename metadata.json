@@ -1,0 +1,13 @@
+{
+  "name": "VividMotion Editor Portfolio",
+  "description": "A highly interactive, playful, and fully customizable portfolio for video editors. Features a Supabase backend for real-time cloud syncing and Gemini AI for content generation.",
+  "stack": {
+    "frontend": "React, Tailwind CSS, Lucide Icons",
+    "backend": "Supabase (PostgreSQL, RLS)",
+    "ai": "Google Gemini 3 Flash"
+  },
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
