@@ -46,28 +46,29 @@ export const DEFAULT_CONFIG: SiteConfig = {
       backgroundVideo: "https://assets.mixkit.co/videos/preview/mixkit-abstract-motion-of-vibrant-colors-40076-large.mp4",
       themeColor: "#00E676",
       content: {
-        title: "RECENT BANGERS",
+        title: "SELECTED BANGERS",
+        description: "High-octane edits and cinematic stories that move the needle.",
         items: [
           { 
             id: "p1", 
-            title: "Cyberpunk 2077 Edit", 
+            title: "Cyber City Night", 
             category: "Commercial", 
-            thumbnail: "https://picsum.photos/seed/edit1/800/450",
-            videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-urban-traffic-in-the-city-at-night-4402-large.mp4"
+            thumbnail: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?q=80&w=1200&auto=format&fit=crop",
+            videoUrl: "https://v.ftcdn.net/04/40/36/45/700_F_440364539_mR7M4ZfQ4o3e9P6iV5vL3vMvMvL6G7oP_ST.mp4"
           },
           { 
             id: "p2", 
-            title: "Urban Rhythms", 
-            category: "Music Video", 
-            thumbnail: "https://picsum.photos/seed/edit2/800/450",
-            videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-slow-motion-of-a-glittery-purple-fabric-spinning-around-40118-large.mp4"
+            title: "Liquid Energy", 
+            category: "Motion Graphics", 
+            thumbnail: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop",
+            videoUrl: "https://v.ftcdn.net/05/12/34/56/700_F_512345678_abcdefghijk.mp4" 
           },
           { 
             id: "p3", 
-            title: "Nature's Echo", 
+            title: "Infinite Horizon", 
             category: "Documentary", 
-            thumbnail: "https://picsum.photos/seed/edit3/800/450",
-            videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-stars-in-the-night-sky-out-of-focus-9126-large.mp4"
+            thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200&auto=format&fit=crop",
+            videoUrl: "https://v.ftcdn.net/02/10/34/56/700_F_210345678_xyz.mp4"
           }
         ]
       }
@@ -82,7 +83,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
       content: {
         title: "BEHIND THE SCREEN",
         description: "With 8+ years of cutting through the noise, I specialize in high-energy edits that keep viewers glued to their screens. My toolkit includes Premiere, After Effects, and a massive supply of coffee.",
-        imageUrl: "https://picsum.photos/seed/editor/600/600"
+        imageUrl: "https://images.unsplash.com/photo-1539351014930-411832bad42e?q=80&w=800&auto=format&fit=crop"
       }
     },
     {
@@ -98,7 +99,8 @@ export const DEFAULT_CONFIG: SiteConfig = {
         email: "hello@vividmotion.com",
         socials: [
           { platform: "Instagram", url: "#" },
-          { platform: "YouTube", url: "#" }
+          { platform: "YouTube", url: "#" },
+          { platform: "Twitter", url: "#" }
         ]
       }
     }
