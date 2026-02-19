@@ -271,7 +271,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ config, lastSynced, onUpdate, o
             <div className="bg-zinc-900/40 p-10 rounded-[2.5rem] border border-white/5 space-y-8">
               <div className="p-6 bg-indigo-500/5 border border-indigo-500/20 rounded-3xl">
                 <p className="text-xs text-indigo-300 leading-relaxed mb-4 font-medium">
-                  To enable cloud syncing, you need to provide your Supabase project keys. You can find these in your **Supabase Dashboard > Settings > API**.
+                  To enable cloud syncing, you need to provide your Supabase project keys. You can find these in your **Supabase Dashboard &gt; Settings &gt; API**.
                 </p>
                 <div className="flex items-center gap-4">
                    <a href="https://supabase.com/dashboard" target="_blank" className="text-[10px] font-bold text-indigo-400 flex items-center gap-1 hover:underline">
