@@ -2,73 +2,69 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { SiteConfig } from '../types';
 
-/**
- * Safely access environment variables across different runtimes/build-tools.
- * Prevents "ReferenceError: process is not defined" in production builds.
- */
+// Hardcoded credentials provided by the user
+const HARDCODED_URL = 'https://byqvbgwjfhqvqmebcjky.supabase.co';
+const HARDCODED_KEY = 'sb_publishable_r4N8VSAzk0S8_PdZYlVYCg_4dAv_1LW';
+
 const getSafeEnv = (key: string): string => {
+  const prefixes = ['', 'VITE_', 'REACT_APP_'];
   try {
-    // Check if we are in a browser environment
-    const isBrowser = typeof window !== 'undefined';
-    
-    // 1. Try process.env (Standard Node/Webpack/CRA)
-    // We use a window check to avoid crashing in environments where 'process' is a strictly guarded global
     if (typeof process !== 'undefined' && process.env) {
-      return (process.env as any)[key] || '';
+      for (const p of prefixes) {
+        const val = (process.env as any)[p + key];
+        if (val) return val;
+      }
     }
-    
-    // 2. Try import.meta.env (Vite)
-    // Wrap in try-catch as some bundlers fail during parsing of 'import.meta'
     try {
       if (typeof import.meta !== 'undefined' && (import.meta as any).env) {
-        return (import.meta as any).env[key] || '';
+        for (const p of prefixes) {
+          const val = (import.meta as any).env[p + key];
+          if (val) return val;
+        }
       }
     } catch (e) {}
-
-    // 3. Fallback to global search if injected via script or other means
     const g = (globalThis as any);
-    if (g && g[key]) return g[key];
-    
-  } catch (err) {
-    console.warn(`Environment check failed for key: ${key}`, err);
-  }
+    for (const p of prefixes) {
+      if (g && g[p + key]) return g[p + key];
+    }
+  } catch (err) {}
   return '';
 };
 
-// Keys storage names
 const URL_KEY = 'vivid_motion_sb_url';
 const ANON_KEY = 'vivid_motion_sb_key';
 
-// Internal state for the client
 let supabaseInstance: SupabaseClient | null = null;
 
-/**
- * Attempts to initialize the Supabase client using env vars or localStorage.
- */
 const initClient = () => {
-  const url = getSafeEnv('SUPABASE_URL') || (typeof localStorage !== 'undefined' ? localStorage.getItem(URL_KEY) : '') || '';
-  const key = getSafeEnv('SUPABASE_ANON_KEY') || (typeof localStorage !== 'undefined' ? localStorage.getItem(ANON_KEY) : '') || '';
+  // If already initialized and we aren't explicitly resetting, return existing
+  if (supabaseInstance) return supabaseInstance;
+
+  const url = getSafeEnv('SUPABASE_URL') || 
+              (typeof localStorage !== 'undefined' ? localStorage.getItem(URL_KEY) : '') || 
+              HARDCODED_URL;
+              
+  const key = getSafeEnv('SUPABASE_ANON_KEY') || 
+              (typeof localStorage !== 'undefined' ? localStorage.getItem(ANON_KEY) : '') || 
+              HARDCODED_KEY;
 
   if (url && key) {
     try {
       supabaseInstance = createClient(url, key);
-      console.log('Supabase client initialized successfully.');
+      console.log('Supabase client initialized.');
     } catch (err) {
-      console.error('Failed to initialize Supabase client:', err);
+      console.error('Supabase init error:', err);
       supabaseInstance = null;
     }
-  } else {
-    supabaseInstance = null;
   }
   return supabaseInstance;
 };
 
-// Initial setup (Browser only or with safe checks)
-if (typeof window !== 'undefined') {
-  initClient();
-}
-
-export const supabase = () => supabaseInstance;
+// Singleton access
+export const supabase = () => {
+  if (!supabaseInstance) return initClient();
+  return supabaseInstance;
+};
 
 const CONFIG_TABLE = 'portfolio_configs';
 const SINGLETON_ID = 1;
@@ -78,33 +74,23 @@ export interface ConfigResponse {
   updatedAt: string;
 }
 
-/**
- * Manually update keys and re-initialize the client.
- */
 export const updateSupabaseConnection = (url: string, key: string) => {
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem(URL_KEY, url);
     localStorage.setItem(ANON_KEY, key);
   }
+  // Clear instance so next call to supabase() re-initializes with new keys
+  supabaseInstance = null;
   return initClient();
 };
 
-/**
- * Checks if Supabase is properly configured.
- */
 export const isSupabaseConnected = (): boolean => {
-  return !!supabaseInstance;
+  return !!supabaseInstance || (!!HARDCODED_URL && !!HARDCODED_KEY);
 };
 
-/**
- * Fetches the site configuration and timestamp from Supabase.
- */
 export const fetchSiteConfig = async (): Promise<ConfigResponse | null> => {
   const client = supabase();
-  if (!client) {
-    console.warn('Supabase fetch skipped: No credentials provided.');
-    return null;
-  }
+  if (!client) return null;
 
   try {
     const { data, error } = await client
@@ -114,10 +100,7 @@ export const fetchSiteConfig = async (): Promise<ConfigResponse | null> => {
       .single();
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        console.log('No existing config found in Supabase.');
-        return null;
-      }
+      if (error.code === 'PGRST116') return null;
       throw error;
     }
     return {
@@ -130,30 +113,19 @@ export const fetchSiteConfig = async (): Promise<ConfigResponse | null> => {
   }
 };
 
-/**
- * Saves the site configuration to Supabase.
- */
 export const saveSiteConfig = async (config: SiteConfig): Promise<{success: boolean, error?: string}> => {
   const client = supabase();
-  if (!client) {
-    return { 
-      success: false, 
-      error: 'Supabase credentials missing. Please set them in the Connection tab.' 
-    };
-  }
+  if (!client) return { success: false, error: 'Database not initialized.' };
 
   try {
     const { error } = await client
       .from(CONFIG_TABLE)
-      .upsert({ id: SINGLETON_ID, config }, { onConflict: 'id' });
+      .upsert({ id: SINGLETON_ID, config, updated_at: new Date().toISOString() }, { onConflict: 'id' });
 
     if (error) throw error;
     return { success: true };
   } catch (err: any) {
     console.error('Supabase Save Error:', err.message || err);
-    return { 
-      success: false, 
-      error: err.message || 'Failed to save. Ensure the "portfolio_configs" table exists.' 
-    };
+    return { success: false, error: err.message || 'Failed to save configuration.' };
   }
 };

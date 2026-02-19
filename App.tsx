@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Settings, Lock, X, ChevronRight, Loader2 } from 'lucide-react';
 import { SiteConfig } from './types';
 import { DEFAULT_CONFIG } from './constants';
@@ -20,22 +20,32 @@ const App: React.FC = () => {
   const [activeVideoUrl, setActiveVideoUrl] = useState("");
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  // Initial Load from Supabase
-  useEffect(() => {
-    const loadConfig = async () => {
-      setIsLoading(true);
+  // Initial Load from Supabase - removed config.sections dependency to stop the loop
+  const loadConfig = useCallback(async (showLoader = true) => {
+    if (showLoader) setIsLoading(true);
+    try {
       const response = await fetchSiteConfig();
-      if (response) {
+      if (response && response.config) {
         setConfig(response.config);
         setLastSynced(response.updatedAt);
-        setActiveVideoUrl(response.config.sections[0]?.backgroundVideo || "");
+        if (response.config.sections && response.config.sections.length > 0) {
+          setActiveVideoUrl(response.config.sections[0].backgroundVideo);
+        }
       } else {
-        setActiveVideoUrl(DEFAULT_CONFIG.sections[0]?.backgroundVideo || "");
+        // Fallback to defaults if no cloud config found
+        setActiveVideoUrl(DEFAULT_CONFIG.sections[0].backgroundVideo);
       }
-      setIsLoading(false);
-    };
-    loadConfig();
+    } catch (err) {
+      console.error("Failed to load config:", err);
+    } finally {
+      if (showLoader) setIsLoading(false);
+    }
   }, []);
+
+  // Run exactly once on mount
+  useEffect(() => {
+    loadConfig();
+  }, [loadConfig]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -59,7 +69,7 @@ const App: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [config, activeVideoUrl]);
+  }, [config.sections, activeVideoUrl]);
 
   const handleAdminToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -88,7 +98,7 @@ const App: React.FC = () => {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-6">
         <Loader2 className="w-12 h-12 text-white animate-spin opacity-20" />
-        <p className="text-white/40 font-bold uppercase tracking-[0.3em] text-[10px] animate-pulse">Syncing Portfolio...</p>
+        <p className="text-white/40 font-bold uppercase tracking-[0.3em] text-[10px] animate-pulse">Establishing Connection...</p>
       </div>
     );
   }
@@ -207,6 +217,7 @@ const App: React.FC = () => {
           config={config} 
           lastSynced={lastSynced}
           onUpdate={setConfig} 
+          onConnectionSuccess={() => loadConfig(false)}
           onClose={() => setIsAdminOpen(false)} 
         />
       )}
