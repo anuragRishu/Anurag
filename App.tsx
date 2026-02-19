@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Settings, Lock, X, ChevronRight, Loader2 } from 'lucide-react';
+import { Settings, Lock, X, ChevronRight, Loader2, Menu } from 'lucide-react';
 import { SiteConfig } from './types';
 import { DEFAULT_CONFIG } from './constants';
 import SectionRenderer from './components/sections/SectionRenderer';
@@ -16,11 +16,11 @@ const App: React.FC = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [loginPasscode, setLoginPasscode] = useState("");
   const [loginError, setLoginError] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const [activeVideoUrl, setActiveVideoUrl] = useState("");
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  // Initial Load from Supabase - removed config.sections dependency to stop the loop
   const loadConfig = useCallback(async (showLoader = true) => {
     if (showLoader) setIsLoading(true);
     try {
@@ -32,7 +32,6 @@ const App: React.FC = () => {
           setActiveVideoUrl(response.config.sections[0].backgroundVideo);
         }
       } else {
-        // Fallback to defaults if no cloud config found
         setActiveVideoUrl(DEFAULT_CONFIG.sections[0].backgroundVideo);
       }
     } catch (err) {
@@ -42,7 +41,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Run exactly once on mount
   useEffect(() => {
     loadConfig();
   }, [loadConfig]);
@@ -103,9 +101,10 @@ const App: React.FC = () => {
     );
   }
 
+  const navLinks = config.sections.filter(s => s.isVisible).sort((a,b) => a.order - b.order);
+
   return (
     <div className="relative min-h-screen bg-black text-white selection:bg-white selection:text-black">
-      {/* Background Layer */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <video
           key={activeVideoUrl}
@@ -121,22 +120,28 @@ const App: React.FC = () => {
         <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
       </div>
 
-      {/* Header Layer */}
-      <header className="fixed top-0 left-0 right-0 z-[100] px-6 py-6 flex items-center justify-between pointer-events-none">
-        <div className="pointer-events-auto flex items-center gap-3">
-          <span className="text-2xl filter drop-shadow-xl">{config.logo}</span>
-          <span className="text-lg md:text-xl font-playful tracking-tighter uppercase">{config.siteName}</span>
+      <header className="fixed top-0 left-0 right-0 z-[100] px-4 md:px-6 py-4 md:py-6 flex items-center justify-between pointer-events-none">
+        <div className="pointer-events-auto flex items-center gap-2 md:gap-3">
+          <span className="text-xl md:text-2xl filter drop-shadow-xl">{config.logo}</span>
+          <span className="text-sm md:text-xl font-playful tracking-tighter uppercase whitespace-nowrap">{config.siteName}</span>
         </div>
         
-        <div className="pointer-events-auto flex items-center gap-6">
+        <div className="pointer-events-auto flex items-center gap-2 md:gap-6">
           <nav className="hidden lg:flex items-center gap-6 text-[10px] font-bold tracking-widest text-white/40 bg-black/20 backdrop-blur-md px-6 py-3 rounded-full border border-white/10">
-            {config.sections.filter(s => s.isVisible).sort((a,b) => a.order - b.order).map(s => (
+            {navLinks.map(s => (
               <a key={s.id} href={`#${s.id}`} className="hover:text-white transition-colors uppercase">
                 {s.content.title?.split(' ')[0] || s.type}
               </a>
             ))}
           </nav>
           
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden p-3 bg-white/5 text-white rounded-full backdrop-blur-2xl border border-white/10"
+          >
+            <Menu size={18} />
+          </button>
+
           <button 
             onClick={handleAdminToggle}
             className="p-3 bg-white/5 hover:bg-white text-white hover:text-black rounded-full backdrop-blur-2xl transition-all duration-300 border border-white/10 shadow-2xl group"
@@ -146,10 +151,26 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Login UI */}
+      {/* Mobile Nav Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[150] bg-black/95 backdrop-blur-3xl flex flex-col items-center justify-center p-8 space-y-8 animate-in fade-in zoom-in-95 duration-300">
+          <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-8 right-8 text-white/40 hover:text-white"><X size={32} /></button>
+          {navLinks.map(s => (
+            <a 
+              key={s.id} 
+              href={`#${s.id}`} 
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-3xl font-playful tracking-tight uppercase hover:text-indigo-400 transition-colors"
+            >
+              {s.content.title?.split(' ')[0] || s.type}
+            </a>
+          ))}
+        </div>
+      )}
+
       {isLoginModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-3xl animate-in fade-in duration-300">
-          <div className="bg-zinc-900/40 border border-white/20 rounded-[2.5rem] p-8 max-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-xl relative">
+          <div className="bg-zinc-900/40 border border-white/20 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 max-w-sm w-full shadow-2xl backdrop-blur-xl relative">
             <button 
               onClick={() => setIsLoginModalOpen(false)}
               className="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors"
@@ -157,10 +178,10 @@ const App: React.FC = () => {
               <X size={20} />
             </button>
             <div className="text-center mb-8">
-              <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10">
+              <div className="w-12 h-12 md:w-14 md:h-14 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10">
                 <Lock className="text-white/60" size={20} />
               </div>
-              <h2 className="text-xl font-bold font-playful tracking-tight uppercase text-white">Admin Access</h2>
+              <h2 className="text-lg md:text-xl font-bold font-playful tracking-tight uppercase text-white">Admin Access</h2>
             </div>
             
             <form onSubmit={handleLogin} className="space-y-4">
@@ -187,7 +208,6 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Content Layer */}
       <main className="relative z-10">
         {config.sections
           .sort((a, b) => a.order - b.order)
@@ -196,14 +216,13 @@ const App: React.FC = () => {
           ))}
       </main>
 
-      {/* Footer Area */}
-      <footer className="relative z-10 px-6 py-20 border-t border-white/10 bg-black/40 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12">
-          <div className="text-center md:text-left">
-            <h3 className="text-2xl font-playful uppercase tracking-tight mb-2">{config.siteName}</h3>
-            <p className="text-zinc-500 text-xs font-bold tracking-widest uppercase">© {new Date().getFullYear()} Cinematic Portfolio</p>
+      <footer className="relative z-10 px-6 py-12 md:py-20 border-t border-white/10 bg-black/40 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8 md:gap-12 text-center md:text-left">
+          <div>
+            <h3 className="text-xl md:text-2xl font-playful uppercase tracking-tight mb-2">{config.logo} {config.siteName}</h3>
+            <p className="text-zinc-500 text-[10px] font-bold tracking-widest uppercase">© {new Date().getFullYear()} Cinematic Portfolio</p>
           </div>
-          <div className="flex gap-8 text-[10px] font-bold tracking-[0.3em] uppercase text-zinc-500">
+          <div className="flex flex-wrap justify-center gap-6 md:gap-8 text-[10px] font-bold tracking-[0.3em] uppercase text-zinc-500">
             <a href="#" className="hover:text-white transition-colors">INSTA</a>
             <a href="#" className="hover:text-white transition-colors">BEHANCE</a>
             <a href="#" className="hover:text-white transition-colors">MAIL</a>
@@ -211,7 +230,6 @@ const App: React.FC = () => {
         </div>
       </footer>
 
-      {/* Admin Panel Overlay */}
       {isAdminOpen && (
         <AdminPanel 
           config={config} 
@@ -222,7 +240,6 @@ const App: React.FC = () => {
         />
       )}
 
-      {/* Interactive Progress Bar */}
       <div className="fixed top-0 left-0 h-1 bg-white z-[110] transition-all duration-100 pointer-events-none" style={{ width: `${scrollProgress * 100}%` }}></div>
     </div>
   );
