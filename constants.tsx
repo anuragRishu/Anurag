@@ -13,7 +13,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
       type: "hero",
       order: 0,
       isVisible: true,
-      backgroundVideo: "https://assets.mixkit.co/videos/preview/mixkit-abstract-motion-of-vibrant-colors-40076-large.mp4",
+      backgroundVideo: "https://cdn.pixabay.com/video/2020/09/24/50812-462820684_large.mp4",
       themeColor: "#00E676",
       content: {
         title: "I BRING PIXELS TO LIFE",
@@ -30,7 +30,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
       type: "intro",
       order: 1,
       isVisible: true,
-      backgroundVideo: "https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-lines-and-dots-in-blue-9122-large.mp4",
+      backgroundVideo: "https://cdn.pixabay.com/video/2023/10/20/185834-876615024_large.mp4",
       themeColor: "#00C853",
       content: {
         title: "HEY, I'M ALEX",
@@ -43,7 +43,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
       type: "projects",
       order: 2,
       isVisible: true,
-      backgroundVideo: "https://assets.mixkit.co/videos/preview/mixkit-abstract-motion-of-vibrant-colors-40076-large.mp4",
+      backgroundVideo: "https://cdn.pixabay.com/video/2021/09/10/88075-603173708_large.mp4",
       themeColor: "#00E676",
       content: {
         title: "SELECTED BANGERS",
@@ -51,24 +51,31 @@ export const DEFAULT_CONFIG: SiteConfig = {
         items: [
           { 
             id: "p1", 
-            title: "Cyber City Night", 
+            title: "Cyberpunk Visions", 
             category: "Commercial", 
             thumbnail: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?q=80&w=1200&auto=format&fit=crop",
-            videoUrl: "https://v.ftcdn.net/04/40/36/45/700_F_440364539_mR7M4ZfQ4o3e9P6iV5vL3vMvMvL6G7oP_ST.mp4"
+            videoUrl: "https://www.youtube.com/watch?v=q6f-JUz17U4" 
           },
           { 
             id: "p2", 
-            title: "Liquid Energy", 
+            title: "Nature's Rhythm", 
             category: "Motion Graphics", 
-            thumbnail: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop",
-            videoUrl: "https://v.ftcdn.net/05/12/34/56/700_F_512345678_abcdefghijk.mp4" 
+            thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200&auto=format&fit=crop",
+            videoUrl: "https://www.youtube.com/watch?v=668nUCeB73A" 
           },
           { 
             id: "p3", 
-            title: "Infinite Horizon", 
-            category: "Documentary", 
-            thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200&auto=format&fit=crop",
-            videoUrl: "https://v.ftcdn.net/02/10/34/56/700_F_210345678_xyz.mp4"
+            title: "Abstract Flow", 
+            category: "Visual Arts", 
+            thumbnail: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1200&auto=format&fit=crop",
+            videoUrl: "https://www.youtube.com/watch?v=z9Y7H_B4D-I"
+          },
+          { 
+            id: "p4", 
+            title: "Urban Pulse", 
+            category: "Street", 
+            thumbnail: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1200&auto=format&fit=crop",
+            videoUrl: "https://www.youtube.com/watch?v=5qap5aO4i9A"
           }
         ]
       }
@@ -78,7 +85,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
       type: "about",
       order: 3,
       isVisible: true,
-      backgroundVideo: "https://assets.mixkit.co/videos/preview/mixkit-stars-in-the-night-sky-out-of-focus-9126-large.mp4",
+      backgroundVideo: "https://cdn.pixabay.com/video/2020/05/25/40133-425145324_large.mp4",
       themeColor: "#00C853",
       content: {
         title: "BEHIND THE SCREEN",
@@ -91,16 +98,16 @@ export const DEFAULT_CONFIG: SiteConfig = {
       type: "contact",
       order: 4,
       isVisible: true,
-      backgroundVideo: "https://assets.mixkit.co/videos/preview/mixkit-waves-of-colored-particles-in-the-air-out-of-focus-9114-large.mp4",
+      backgroundVideo: "https://cdn.pixabay.com/video/2022/01/18/104624-666355609_large.mp4",
       themeColor: "#00E676",
       content: {
         title: "LET'S COLLAB",
         description: "Ready to take your content to the next level? Drop me a line and let's discuss your vision.",
         email: "hello@vividmotion.com",
         socials: [
-          { platform: "Instagram", url: "#" },
-          { platform: "YouTube", url: "#" },
-          { platform: "Twitter", url: "#" }
+          { platform: "Instagram", url: "https://instagram.com" },
+          { platform: "YouTube", url: "https://youtube.com" },
+          { platform: "X", url: "https://x.com" }
         ]
       }
     }

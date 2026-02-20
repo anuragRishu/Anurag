@@ -2,32 +2,25 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { SiteConfig } from '../types';
 
-// Hardcoded credentials provided by the user
-const HARDCODED_URL = 'https://byqvbgwjfhqvqmebcjky.supabase.co';
-const HARDCODED_KEY = 'sb_publishable_r4N8VSAzk0S8_PdZYlVYCg_4dAv_1LW';
+// Hardcoded credentials - set to empty to force environment or UI configuration
+const HARDCODED_URL = '';
+const HARDCODED_KEY = '';
 
 const getSafeEnv = (key: string): string => {
-  const prefixes = ['', 'VITE_', 'REACT_APP_'];
+  // Standard Vite environment variable access
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    const val = import.meta.env[`VITE_${key}`];
+    if (val) return val;
+  }
+  
+  // Fallback for other environments
   try {
     if (typeof process !== 'undefined' && process.env) {
-      for (const p of prefixes) {
-        const val = (process.env as any)[p + key];
-        if (val) return val;
-      }
+      const val = process.env[`VITE_${key}`] || process.env[key];
+      if (val) return val;
     }
-    try {
-      if (typeof import.meta !== 'undefined' && (import.meta as any).env) {
-        for (const p of prefixes) {
-          const val = (import.meta as any).env[p + key];
-          if (val) return val;
-        }
-      }
-    } catch (e) {}
-    const g = (globalThis as any);
-    for (const p of prefixes) {
-      if (g && g[p + key]) return g[p + key];
-    }
-  } catch (err) {}
+  } catch (e) {}
+  
   return '';
 };
 
@@ -37,7 +30,7 @@ const ANON_KEY = 'vivid_motion_sb_key';
 let supabaseInstance: SupabaseClient | null = null;
 
 const initClient = () => {
-  // If already initialized and we aren't explicitly resetting, return existing
+  // If already initialized, return existing
   if (supabaseInstance) return supabaseInstance;
 
   const url = getSafeEnv('SUPABASE_URL') || 
@@ -48,15 +41,19 @@ const initClient = () => {
               (typeof localStorage !== 'undefined' ? localStorage.getItem(ANON_KEY) : '') || 
               HARDCODED_KEY;
 
-  if (url && key) {
-    try {
-      supabaseInstance = createClient(url, key);
-      console.log('Supabase client initialized.');
-    } catch (err) {
-      console.error('Supabase init error:', err);
-      supabaseInstance = null;
-    }
+  if (!url || !key || url === 'https://your-project-id.supabase.co' || key.includes('your-anon-key')) {
+    console.warn('Supabase credentials missing or using placeholders.');
+    return null;
   }
+
+  try {
+    supabaseInstance = createClient(url, key);
+    console.log('Supabase client initialized.');
+  } catch (err) {
+    console.error('Supabase init error:', err);
+    supabaseInstance = null;
+  }
+  
   return supabaseInstance;
 };
 
@@ -101,6 +98,9 @@ export const fetchSiteConfig = async (): Promise<ConfigResponse | null> => {
 
     if (error) {
       if (error.code === 'PGRST116') return null;
+      if (error.message?.includes('Unregistered API key')) {
+        throw new Error('Invalid Supabase API Key. Please check your credentials in the Studio Cloud settings.');
+      }
       throw error;
     }
     return {

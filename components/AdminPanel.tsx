@@ -25,8 +25,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ config, lastSynced, onUpdate, o
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const [sbUrl, setSbUrl] = useState(localStorage.getItem('vivid_motion_sb_url') || "https://byqvbgwjfhqvqmebcjky.supabase.co");
-  const [sbKey, setSbKey] = useState(localStorage.getItem('vivid_motion_sb_key') || "sb_publishable_r4N8VSAzk0S8_PdZYlVYCg_4dAv_1LW");
+  const [sbUrl, setSbUrl] = useState(localStorage.getItem('vivid_motion_sb_url') || import.meta.env.VITE_SUPABASE_URL || "https://byqvbgwjfhqvqmebcjky.supabase.co");
+  const [sbKey, setSbKey] = useState(localStorage.getItem('vivid_motion_sb_key') || import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_r4N8VSAzk0S8_PdZYlVYCg_4dAv_1LW");
 
   const handleGeneralUpdate = (field: keyof SiteConfig, value: string) => {
     onUpdate({ ...config, [field]: value });

@@ -21,6 +21,8 @@ const App: React.FC = () => {
   const [activeVideoUrl, setActiveVideoUrl] = useState("");
   const [scrollProgress, setScrollProgress] = useState(0);
 
+  const [videoError, setVideoError] = useState(false);
+
   const loadConfig = useCallback(async (showLoader = true) => {
     if (showLoader) setIsLoading(true);
     try {
@@ -29,7 +31,8 @@ const App: React.FC = () => {
         setConfig(response.config);
         setLastSynced(response.updatedAt);
         if (response.config.sections && response.config.sections.length > 0) {
-          setActiveVideoUrl(response.config.sections[0].backgroundVideo);
+          const firstVisible = response.config.sections.find(s => s.isVisible) || response.config.sections[0];
+          setActiveVideoUrl(firstVisible.backgroundVideo);
         }
       } else {
         setActiveVideoUrl(DEFAULT_CONFIG.sections[0].backgroundVideo);
@@ -62,6 +65,7 @@ const App: React.FC = () => {
       
       if (activeSection && activeSection.backgroundVideo !== activeVideoUrl) {
         setActiveVideoUrl(activeSection.backgroundVideo);
+        setVideoError(false);
       }
     };
 
@@ -106,17 +110,26 @@ const App: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-black text-white selection:bg-white selection:text-black">
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <video
-          key={activeVideoUrl}
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute min-w-full min-h-full object-cover opacity-30 transition-opacity duration-1000 scale-105 blur-lg"
-        >
-          <source src={activeVideoUrl} type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60"></div>
+        {/* Background Fallback Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-20 transition-opacity duration-1000"
+          style={{ backgroundImage: `url('https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1920&auto=format&fit=crop')` }}
+        ></div>
+
+        {!videoError && activeVideoUrl && (
+          <video
+            key={activeVideoUrl}
+            autoPlay
+            muted
+            loop
+            playsInline
+            onError={() => setVideoError(true)}
+            className="absolute min-w-full min-h-full object-cover opacity-30 transition-opacity duration-1000 scale-105 blur-md"
+          >
+            <source src={activeVideoUrl} type="video/mp4" />
+          </video>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
         <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
       </div>
 
